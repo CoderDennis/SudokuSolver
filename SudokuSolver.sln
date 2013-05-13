@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "SudokuSolver", "SudokuSolver.fsproj", "{4E83F6A9-2347-413B-937B-C67DF38853F2}"
 EndProject
 Global
