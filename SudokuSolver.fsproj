@@ -48,6 +48,7 @@
     </None>
     <None Include="README" />
     <None Include="test.sdk" />
+    <Content Include="sudoku17.txt" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="FSharp.PowerPack.Parallel.Seq">

@@ -17,38 +17,15 @@ type sdkelt =
      | Options of List<int32>
      | Nothing
 
-// Read in the input
-// Accept basically anything: Either a 9x9 square or a long list of 81 numbers
-let file = @"..\..\test.sdk"
-
-let lines = File.ReadLines(file)
-let trimmedlines = lines |> Seq.map(fun x -> x.Replace(".", "0").Trim())
-let longline = trimmedlines |> Seq.fold(fun acc l -> String.Format("{0}{1}", acc, l)) ""
-let numbers = longline.ToCharArray() |> Array.map(fun x -> 
-                                                    let ci = Int32.Parse(x.ToString())
-                                                    if ci = 0 then sdkelt.Options [ 1 .. 9 ]
-                                                    else sdkelt.Certain ci
-                                                   )
-
-// We keep our stuff in this. Doing a 2D array was a bad idea
-let elems : sdkelt[,] = Array2D.init 9 9 (fun i j -> sdkelt.Options [])
-
-numbers |> Array.iteri(fun n x ->
-    let i = n / 9
-    let j = n % 9
-    elems.[i, j] <- x
-    )
-
 // Can't do fold etc over  2d array so this flattens it
 let flatten (A:'a[,]) = A |> Seq.cast<'a>
-
-
 
 // Count how many certains are in the square
 let countcertains (arr:sdkelt[,]) =
     flatten arr |> Seq.filter( fun x -> match x with
                                             | Certain i -> true
                                             | _ -> false ) |> Seq.length
+
 // Check if we have contradictions
 let iscontradiction (arr:sdkelt[,]) =
     let imps = flatten arr |> Seq.filter( fun x -> match x with
@@ -88,11 +65,11 @@ let findimpossibles (arr:sdkelt[,]) i j =
                                         | _ -> ignore 0
                         } |> Seq.toList
     let sqrimp = seq { for k in (i / 3) * 3 .. (i / 3) * 3 + 2 do
-        for l in (j / 3) * 3 .. (j / 3 ) * 3 + 2 do
-            if  not ( k = i && l = j) then 
-                match arr.[k, l] with 
-                    | Certain x -> yield x
-                    | _ -> ignore 0
+                            for l in (j / 3) * 3 .. (j / 3 ) * 3 + 2 do
+                                if  not ( k = i && l = j) then 
+                                    match arr.[k, l] with 
+                                        | Certain x -> yield x
+                                        | _ -> ignore 0
         } 
     let sqrlst = sqrimp    |> Seq.toList
     [rowimp; colimp; sqrlst ] |> List.concat
@@ -160,7 +137,27 @@ let converttostring (arr:sdkelt[,]) =
                                                         ))
     s.ToString()
 
-    
+// Read in the input
+// Accept basically anything: Either a 9x9 square or a long list of 81 numbers
+let file = @"..\..\test.sdk"
+
+let lines = File.ReadLines(file)
+let trimmedlines = lines |> Seq.map(fun x -> x.Replace(".", "0").Trim())
+let longline = trimmedlines |> Seq.fold(fun acc l -> String.Format("{0}{1}", acc, l)) ""
+let numbers = longline.ToCharArray() |> Array.map(fun x -> 
+                                                    let ci = Int32.Parse(x.ToString())
+                                                    if ci = 0 then sdkelt.Options [ 1 .. 9 ]
+                                                    else sdkelt.Certain ci
+                                                   )
+
+// We keep our stuff in this. Doing a 2D array was a bad idea
+let elems : sdkelt[,] = Array2D.init 9 9 (fun i j -> sdkelt.Options [])
+
+numbers |> Array.iteri(fun n x ->
+    let i = n / 9
+    let j = n % 9
+    elems.[i, j] <- x
+    )    
 
 // All set up. Let's go find a solution then
 printfn "--"
