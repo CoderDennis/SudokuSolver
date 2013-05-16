@@ -11,6 +11,7 @@ open System
 open System.IO
 open System.Text
 open Microsoft.FSharp.Collections
+open System.Linq
 
 type sdkelt =
      | Certain of int32
@@ -142,12 +143,13 @@ let converttostring arr =
     s.ToString()
 
 // We keep our stuff in this. Doing a 2D array was a bad idea
-let elems : sdkelt[,] = Array2D.init 9 9 (fun i j -> sdkelt.Options [])
+
 
 let timer = new System.Diagnostics.Stopwatch()
 
-File.ReadLines("test.sdk")
+File.ReadLines("test.sdk").Skip(1) // sudoku17.txt test.sdk
     |> Seq.map (fun x -> 
+                    let elems : sdkelt[,] = Array2D.init 9 9 (fun i j -> sdkelt.Options [])
                     x.Trim().ToCharArray()
                     |> Array.map(fun x -> 
                                     let ci = Int32.Parse(x.ToString())
@@ -159,18 +161,23 @@ File.ReadLines("test.sdk")
                                       let j = n % 9
                                       elems.[i, j] <- x
                                    )
-                    elems  
+                    (x, elems)  
                )
-    |> Seq.iter (fun x ->
+    |> Seq.map (fun (i, x) ->
                     printfn "--"
                     timer.Reset()
                     timer.Start() 
-                    (findsolution x) 
-                    |> converttostring
-                    |> printfn "%s" 
+                    let r = findsolution x 
+                                |> converttostring
+                    printfn "%s" r
                     timer.Stop()
-                    printfn "%A" timer.ElapsedMilliseconds
+                    let t = timer.ElapsedMilliseconds
+                    printfn "%A" t
+                    (i, r, t)
                 )
+    |> Seq.sortBy (fun (_, _, t) -> t)
+    |> Seq.map (fun (i, r, _) -> sprintf "%s:%s" r i )
+    |> (fun x -> File.WriteAllLines( "solved.txt", x ))
 
 //Pause with the solution on screen
 ignore (Console.ReadLine())
