@@ -36,20 +36,17 @@ let iscontradiction (arr:sdkelt[,]) =
         | 0 -> false
         | _ -> true
 
-// Find the (i,j) of the element we want to guess at. Should rewrite this one I guess
+// Find the (i,j) of the element we want to guess at.
 let getelementtoguessat (arr:sdkelt[,]) =
-    let mutable numelts = 9
-    let mutable ibest = 0
-    let mutable jbest = 0
-    for i in 0 .. 8 do
-        for j in 0 .. 8 do
-            match arr.[i,j] with
-                | Options opt -> if opt.Length < numelts then
-                                            numelts <- opt.Length
-                                            ibest <- i
-                                            jbest <- j
-                | _ -> ignore 0
-    (ibest, jbest)
+    seq {for i in 0 .. 8 do
+            for j in 0 .. 8 do
+                match arr.[i,j] with
+                    | Options opt -> yield (opt.Length, i, j)
+                    | _ -> ignore 0
+        }
+    |> Seq.sortBy (fun (l, _, _) -> l)
+    |> Seq.head
+    |> fun (_,i,j) -> (i,j)
 
 // Find a list of the values that can definitely not go at position i,j
 let findimpossibles (arr:sdkelt[,]) i j =
@@ -140,8 +137,7 @@ let converttostring arr =
                                                         ))
     s.ToString()
 
-// We keep our stuff in this. Doing a 2D array was a bad idea
-
+// Doing a 2D array was a bad idea
 
 let timer = new System.Diagnostics.Stopwatch()
 
@@ -159,8 +155,7 @@ File.ReadLines("test.sdk").Skip(1) // sudoku17.txt test.sdk
                     printfn "--"
                     timer.Reset()
                     timer.Start() 
-                    let r = findsolution x 
-                                |> converttostring
+                    let r = findsolution x |> converttostring
                     printfn "%s" r
                     timer.Stop()
                     let t = timer.ElapsedMilliseconds
