@@ -71,16 +71,15 @@ let findimpossibles (arr:sdkelt[,]) i j =
                                     match arr.[k, l] with 
                                         | Certain x -> yield x
                                         | _ -> ignore 0
-        } 
-    let sqrlst = sqrimp    |> Seq.toList
-    [rowimp; colimp; sqrlst ] |> List.concat
+                        } |> Seq.toList
+    [rowimp; colimp; sqrimp ] |> List.concat
 
 // Eliminate the obviously impossible values based on the certains we have
 let rec eleminateimpossibles arr : sdkelt[,] =
     let countcertainsbefore = countcertains arr
     let res = arr |> Array2D.mapi(fun i j (el:sdkelt) -> 
             let impos = findimpossibles arr i j
-            let res = match arr.[i, j] with
+            match arr.[i, j] with
                         | Nothing -> sdkelt.Nothing
                         | Certain x -> if (impos |> Seq.exists(fun y -> x = y)) then sdkelt.Nothing else Certain x
                         | Options opt -> 
@@ -92,7 +91,6 @@ let rec eleminateimpossibles arr : sdkelt[,] =
                                     elif List.length(take) = 1 then Certain (List.head(take))
                                     else Nothing
                                 r
-            res
     )
     if countcertainsbefore = (countcertains res) then res
     else eleminateimpossibles res
@@ -135,7 +133,7 @@ let findsolution (arr:sdkelt[,]) =
 // I use http://www.sudoku-solutions.com/ to check the results
 let converttostring arr =
     let s:StringBuilder = StringBuilder()
-    arr |> Array2D.iter(fun x -> Printf.bprintf s "%s" (match  x with 
+    arr |> Array2D.iter(fun x -> Printf.bprintf s "%s" (match x with 
                                                         | Certain i -> i.ToString()
                                                         | Options opt -> "."
                                                         | Nothing -> "-"
@@ -149,19 +147,13 @@ let timer = new System.Diagnostics.Stopwatch()
 
 File.ReadLines("test.sdk").Skip(1) // sudoku17.txt test.sdk
     |> Seq.map (fun x -> 
-                    let elems : sdkelt[,] = Array2D.init 9 9 (fun i j -> sdkelt.Options [])
                     x.Trim().ToCharArray()
                     |> Array.map(fun x -> 
                                     let ci = Int32.Parse(x.ToString())
                                     if ci = 0 then sdkelt.Options [ 1 .. 9 ]
                                     else sdkelt.Certain ci
-                                    )
-                    |> Array.iteri(fun n x ->
-                                      let i = n / 9
-                                      let j = n % 9
-                                      elems.[i, j] <- x
-                                   )
-                    (x, elems)  
+                                 )
+                    |> (fun nums -> (x, Array2D.init 9 9 (fun i j -> nums.[ i * 9 + j ] ))) 
                )
     |> Seq.map (fun (i, x) ->
                     printfn "--"
