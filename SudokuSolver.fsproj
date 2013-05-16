@@ -51,9 +51,6 @@
     <Content Include="sudoku17.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="FSharp.PowerPack.Parallel.Seq">
-      <HintPath>ExtraDlls\FSharp.PowerPack.Parallel.Seq.dll</HintPath>
-    </Reference>
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core" />
     <Reference Include="System" />

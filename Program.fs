@@ -105,15 +105,18 @@ let issolved  (arr:sdkelt[,]) =
 // I only find the first solution if there are multiple posibilites
 let findsolution (arr:sdkelt[,]) =
     let f (arr:sdkelt[,]) i j =
-        let s = match arr.[i,j] with 
-                | Options opt ->  opt |> List.toSeq |> PSeq.map(fun x -> 
-                                    let cp = arr |> Array2D.copy
-                                    cp.[i, j] <- sdkelt.Certain x
-                                    eleminateimpossibles cp)
-                | Certain x -> [ arr ]  |> PSeq.map(fun x -> x)
-                | Nothing -> [] |> PSeq.map(fun x -> x)
-        s |> PSeq.filter(fun a -> not (iscontradiction a))
-    let rec g (se:seq<sdkelt[,]>) =
+        match arr.[i,j] with 
+                | Options opt ->  opt 
+                                    |> List.toArray 
+                                    |> Array.map(fun x -> 
+                                                let cp = arr |> Array2D.copy
+                                                cp.[i, j] <- sdkelt.Certain x
+                                                eleminateimpossibles cp)
+                                    |> Array.toSeq
+                | Certain x -> [ arr ]  |> Seq.map(fun x -> x)
+                | Nothing -> [] |> Seq.map(fun x -> x)
+        |> Seq.filter(fun a -> not (iscontradiction a))
+    let rec g se =
         seq {
             for x in se do
                 if issolved x then yield x
@@ -123,12 +126,14 @@ let findsolution (arr:sdkelt[,]) =
                     let expand = f x i j
                     yield! g expand
         }
-    let init = [ (eleminateimpossibles arr) ] |> List.toSeq
-    (g init) |> Seq.take(1)
+    [ (eleminateimpossibles arr) ] 
+    |> List.toSeq
+    |> g 
+    |> Seq.take(1)
 
 // Print out the solution as a long string of numbers
 // I use http://www.sudoku-solutions.com/ to check the results
-let converttostring (arr:sdkelt[,]) =
+let converttostring arr =
     let s:StringBuilder = StringBuilder()
     arr |> Array2D.iter(fun x -> Printf.bprintf s "%s" (match  x with 
                                                         | Certain i -> i.ToString()
