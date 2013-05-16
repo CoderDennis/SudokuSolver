@@ -47,7 +47,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="README" />
-    <None Include="test.sdk" />
+    <Content Include="test.sdk">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="sudoku17.txt" />
   </ItemGroup>
   <ItemGroup>

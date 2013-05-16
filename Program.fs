@@ -108,7 +108,7 @@ let findsolution (arr:sdkelt[,]) =
         match arr.[i,j] with 
                 | Options opt ->  opt 
                                     |> List.toArray 
-                                    |> Array.map(fun x -> 
+                                    |> Array.Parallel.map(fun x -> 
                                                 let cp = arr |> Array2D.copy
                                                 cp.[i, j] <- sdkelt.Certain x
                                                 eleminateimpossibles cp)
@@ -120,8 +120,7 @@ let findsolution (arr:sdkelt[,]) =
         seq {
             for x in se do
                 if issolved x then yield x
-                else if iscontradiction x then yield! ([] |> List.toSeq)
-                else 
+                else if not (iscontradiction x) then
                     let (i, j) = getelementtoguessat x
                     let expand = f x i j
                     yield! g expand
@@ -129,7 +128,7 @@ let findsolution (arr:sdkelt[,]) =
     [ (eleminateimpossibles arr) ] 
     |> List.toSeq
     |> g 
-    |> Seq.take(1)
+    |> Seq.head
 
 // Print out the solution as a long string of numbers
 // I use http://www.sudoku-solutions.com/ to check the results
@@ -142,37 +141,36 @@ let converttostring arr =
                                                         ))
     s.ToString()
 
-// Read in the input
-// Accept basically anything: Either a 9x9 square or a long list of 81 numbers
-let file = @"..\..\test.sdk"
-
-let lines = File.ReadLines(file)
-let trimmedlines = lines |> Seq.map(fun x -> x.Replace(".", "0").Trim())
-let longline = trimmedlines |> Seq.fold(fun acc l -> String.Format("{0}{1}", acc, l)) ""
-let numbers = longline.ToCharArray() |> Array.map(fun x -> 
-                                                    let ci = Int32.Parse(x.ToString())
-                                                    if ci = 0 then sdkelt.Options [ 1 .. 9 ]
-                                                    else sdkelt.Certain ci
-                                                   )
-
 // We keep our stuff in this. Doing a 2D array was a bad idea
 let elems : sdkelt[,] = Array2D.init 9 9 (fun i j -> sdkelt.Options [])
 
-numbers |> Array.iteri(fun n x ->
-    let i = n / 9
-    let j = n % 9
-    elems.[i, j] <- x
-    )    
-
-// All set up. Let's go find a solution then
-printfn "--"
 let timer = new System.Diagnostics.Stopwatch()
-timer.Start()
-(findsolution elems) |> Seq.iter (fun x -> printfn "%s" (converttostring x)) 
-timer.Stop()
-printfn "%A" timer.ElapsedMilliseconds
-//printfn "--"
-//(findsolution (eleminateimpossibles elems)) |> Seq.iter (fun x -> printfn "%A" x) 
+
+File.ReadLines("test.sdk")
+    |> Seq.map (fun x -> 
+                    x.Trim().ToCharArray()
+                    |> Array.map(fun x -> 
+                                    let ci = Int32.Parse(x.ToString())
+                                    if ci = 0 then sdkelt.Options [ 1 .. 9 ]
+                                    else sdkelt.Certain ci
+                                    )
+                    |> Array.iteri(fun n x ->
+                                      let i = n / 9
+                                      let j = n % 9
+                                      elems.[i, j] <- x
+                                   )
+                    elems  
+               )
+    |> Seq.iter (fun x ->
+                    printfn "--"
+                    timer.Reset()
+                    timer.Start() 
+                    (findsolution x) 
+                    |> converttostring
+                    |> printfn "%s" 
+                    timer.Stop()
+                    printfn "%A" timer.ElapsedMilliseconds
+                )
 
 //Pause with the solution on screen
 ignore (Console.ReadLine())
