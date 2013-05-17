@@ -139,10 +139,12 @@ let converttostring arr =
 
 // Doing a 2D array was a bad idea
 
-let timer = new System.Diagnostics.Stopwatch()
+let totalTimer = new System.Diagnostics.Stopwatch()
+totalTimer.Start()
 
-File.ReadLines("test.sdk").Skip(1) // sudoku17.txt test.sdk
-    |> Seq.map (fun x -> 
+File.ReadLines("sudoku17.txt").Skip(1).Take(15) // sudoku17.txt test.sdk
+    |> Array.ofSeq
+    |> Array.map (fun x -> 
                     x.Trim().ToCharArray()
                     |> Array.map(fun x -> 
                                     let ci = Int32.Parse(x.ToString())
@@ -151,9 +153,9 @@ File.ReadLines("test.sdk").Skip(1) // sudoku17.txt test.sdk
                                  )
                     |> (fun nums -> (x, Array2D.init 9 9 (fun i j -> nums.[ i * 9 + j ] ))) 
                )
-    |> Seq.map (fun (i, x) ->
-                    printfn "--"
-                    timer.Reset()
+    |> Array.Parallel.map (fun (i, x) ->
+                    //printfn "--"
+                    let timer = new System.Diagnostics.Stopwatch()
                     timer.Start() 
                     let r = findsolution x |> converttostring
                     printfn "%s" r
@@ -165,6 +167,10 @@ File.ReadLines("test.sdk").Skip(1) // sudoku17.txt test.sdk
     |> Seq.sortBy (fun (_, _, t) -> t)
     |> Seq.map (fun (i, r, _) -> sprintf "%s:%s" r i )
     |> (fun x -> File.WriteAllLines( "solved.txt", x ))
+
+totalTimer.Stop()
+
+printfn "%A" totalTimer.ElapsedMilliseconds
 
 //Pause with the solution on screen
 ignore (Console.ReadLine())
