@@ -29,12 +29,10 @@ let countcertains (arr:sdkelt[,]) =
 
 // Check if we have contradictions
 let iscontradiction (arr:sdkelt[,]) =
-    let imps = flatten arr |> Seq.filter( fun x -> match x with
-                                                    | Nothing -> true
-                                                    | _ -> false ) |> Seq.length
-    match imps with
-        | 0 -> false
-        | _ -> true
+    flatten arr 
+    |> Seq.exists( fun x -> match x with
+                                | Nothing -> true
+                                | _ -> false )
 
 // Find the (i,j) of the element we want to guess at.
 let getelementtoguessat (arr:sdkelt[,]) =
@@ -83,11 +81,9 @@ let rec eleminateimpossibles arr : sdkelt[,] =
                                 let take, leave = opt |> List.partition(fun x -> 
                                     (impos |> Seq.tryFindIndex(fun y -> x = y))  = None
                                 )
-                                let r = 
-                                    if List.length(take) > 1 then Options take 
-                                    elif List.length(take) = 1 then Certain (List.head(take))
-                                    else Nothing
-                                r
+                                if List.length(take) > 1 then Options take 
+                                elif List.length(take) = 1 then Certain (List.head(take))
+                                else Nothing
     )
     if countcertainsbefore = (countcertains res) then res
     else eleminateimpossibles res
@@ -142,7 +138,7 @@ let converttostring arr =
 let totalTimer = new System.Diagnostics.Stopwatch()
 totalTimer.Start()
 
-File.ReadLines("sudoku17.txt").Skip(1).Take(15) // sudoku17.txt test.sdk
+File.ReadLines("sudoku17.txt").Skip(1).Take(10) // sudoku17.txt test.sdk
     |> Array.ofSeq
     |> Array.map (fun x -> 
                     x.Trim().ToCharArray()
@@ -153,7 +149,7 @@ File.ReadLines("sudoku17.txt").Skip(1).Take(15) // sudoku17.txt test.sdk
                                  )
                     |> (fun nums -> (x, Array2D.init 9 9 (fun i j -> nums.[ i * 9 + j ] ))) 
                )
-    |> Array.Parallel.map (fun (i, x) ->
+    |> Array.map (fun (i, x) ->
                     //printfn "--"
                     let timer = new System.Diagnostics.Stopwatch()
                     timer.Start() 
