@@ -14,18 +14,20 @@ open Microsoft.FSharp.Collections
 open System.Linq
 
 type sdkelt =
-     | Certain of int32
-     | Options of List<int32>
+     | Certain of byte
+     | Options of List<byte>
      | Nothing
 
-// Can't do fold etc over  2d array so this flattens it
+// Can't do fold etc over 2d array so this flattens it
 let flatten (A:'a[,]) = A |> Seq.cast<'a>
 
 // Count how many certains are in the square
 let countcertains (arr:sdkelt[,]) =
-    flatten arr |> Seq.filter( fun x -> match x with
-                                            | Certain i -> true
-                                            | _ -> false ) |> Seq.length
+    flatten arr 
+    |> Seq.filter( fun x -> match x with
+                                | Certain i -> true
+                                | _ -> false ) 
+    |> Seq.length
 
 // Check if we have contradictions
 let iscontradiction (arr:sdkelt[,]) =
@@ -124,13 +126,13 @@ let findsolution arr =
 // Print out the solution as a long string of numbers
 // I use http://www.sudoku-solutions.com/ to check the results
 let converttostring arr =
-    let s:StringBuilder = StringBuilder()
-    arr |> Array2D.iter(fun x -> Printf.bprintf s "%s" (match x with 
-                                                        | Certain i -> i.ToString()
-                                                        | Options opt -> "."
-                                                        | Nothing -> "-"
-                                                        ))
-    s.ToString()
+    flatten arr 
+    |> Seq.map(fun x -> match x with 
+                            | Certain i -> i.ToString()
+                            | Options opt -> "."
+                            | Nothing -> "-"
+               )
+    |> System.String.Concat
 
 // Doing a 2D array was a bad idea
 
@@ -142,8 +144,8 @@ File.ReadLines("sudoku17.txt").Skip(1).Take(10) // sudoku17.txt test.sdk
     |> Array.map (fun x -> 
                     x.Trim().ToCharArray()
                     |> Array.map(fun x -> 
-                                    let ci = Int32.Parse(x.ToString())
-                                    if ci = 0 then sdkelt.Options [ 1 .. 9 ]
+                                    let ci = Byte.Parse(x.ToString())
+                                    if ci = 0uy then sdkelt.Options [ 1uy .. 9uy ]
                                     else sdkelt.Certain ci
                                  )
                     |> (fun nums -> (x, Array2D.init 9 9 (fun i j -> nums.[ i * 9 + j ] ))) 
