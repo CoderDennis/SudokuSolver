@@ -22,7 +22,7 @@ type sdkelt =
 let flatten (A:'a[,]) = A |> Seq.cast<'a>
 
 // Count how many certains are in the square
-let countcertains (arr:sdkelt[,]) =
+let countcertains arr =
     flatten arr 
     |> Seq.filter( fun x -> match x with
                                 | Certain i -> true
@@ -30,7 +30,7 @@ let countcertains (arr:sdkelt[,]) =
     |> Seq.length
 
 // Check if we have contradictions
-let iscontradiction (arr:sdkelt[,]) =
+let iscontradiction arr =
     flatten arr 
     |> Seq.exists( fun x -> match x with
                                 | Nothing -> true
@@ -72,7 +72,7 @@ let findimpossibles (arr:sdkelt[,]) i j =
     [rowimp; colimp; sqrimp ] |> List.concat
 
 // Eliminate the obviously impossible values based on the certains we have
-let rec eleminateimpossibles arr : sdkelt[,] =
+let rec eleminateimpossibles arr =
     let countcertainsbefore = countcertains arr
     let res = arr |> Array2D.mapi(fun i j (el:sdkelt) -> 
             let impos = findimpossibles arr i j
