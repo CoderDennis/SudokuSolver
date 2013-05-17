@@ -89,13 +89,12 @@ let rec eleminateimpossibles arr : sdkelt[,] =
     else eleminateimpossibles res
 
 // Check if we are done
-let issolved  (arr:sdkelt[,]) =
+let issolved arr =
     (countcertains (eleminateimpossibles arr) = 9 * 9)
-
 
 // Find "the" solution. Alternately elmininate obviously impossibles and guess when you can't do obvious eliminations
 // I only find the first solution if there are multiple posibilites
-let findsolution (arr:sdkelt[,]) =
+let findsolution arr =
     let f (arr:sdkelt[,]) i j =
         match arr.[i,j] with 
                 | Options opt ->  opt 
