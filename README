@@ -1,4 +1,13 @@
-﻿Program to solve Sudoku Puzzles written in F#
+﻿I have made several refactorings and have cleaned up the code to make it easier for me to follow what it's doing. I've also eliminated all the mutable values and some temporary values.
+
+The biggest change I made was to solve more than one puzzle. The input file is now in the format of one puzzle per line.
+
+- CoderDennis
+
+
+----------------- Original Readme -----------------------------
+
+Program to solve Sudoku Puzzles written in F#
 
 The solver is efficient in the places that count and solves "hard" sudoku 
 puzzles in no more than 60 secs. The solver uses multiple cores to search 
